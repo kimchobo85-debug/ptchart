@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-site-verification" content="mSnVFKR6XUo5e9MALungbeksJB44nmScRedEKOmyKZE" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PT Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;min-height:100vh;padding-bottom:80px;color:#0f172a}
+
+/* ── HEADER ── */
+.hdr{background:#0f172a;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;border-bottom:1px solid #1e293b}
+.logo{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px}
+.logo-dot{color:#38bdf8}
+.nav-wrap{display:flex;gap:3px;background:rgba(255,255,255,0.06);padding:3px;border-radius:10px}
+.nav-btn{padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:transparent;color:rgba(255,255,255,0.5);transition:all 0.15s;font-family:inherit}
+.nav-btn.active{background:#fff;color:#0f172a;font-weight:700}
+
+/* ── LAYOUT ── */
+.wrap{max-width:700px;margin:0 auto;padding:18px 14px}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:16px;padding:18px;margin-bottom:10px;border:1.5px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.card-sub{background:#f8fafc;border-radius:12px;padding:14px;border:1.5px solid #e2e8f0;margin-bottom:8px}
+
+/* ── TYPOGRAPHY ── */
+.sec{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:9px;border-bottom:1.5px solid #f1f5f9}
+.lbl{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── INPUTS ── */
+input,textarea,select{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;color:#0f172a;font-size:13px;outline:none;width:100%;font-family:inherit;transition:border-color 0.15s}
+input:focus,textarea:focus,select:focus{border-color:#38bdf8;background:#fff}
+textarea{resize:vertical;min-height:60px}
+select{cursor:pointer}
+
+/* ── BUTTONS ── */
+.bp{background:#0f172a;color:#fff;border:none;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;transition:opacity 0.15s}
+.bp:hover{opacity:0.85}
+.bs{background:#f0fdf4;color:#15803d;border:1.5px solid #86efac;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.bd{background:#fff1f2;color:#be123c;border:1.5px solid #fda4af;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.bg{background:#f8fafc;color:#475569;border:1.5px solid #e2e8f0;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.borange{background:#fff7ed;color:#c2410c;border:1.5px solid #fed7aa;padding:9px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700}
+
+/* ── PATIENT CARD ── */
+.pc{background:#fff;border-radius:16px;padding:15px 16px;margin-bottom:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all 0.15s}
+.pc:hover{border-color:#94a3b8;box-shadow:0 4px 16px rgba(0,0,0,0.08);transform:translateY(-1px)}
+.pc.dimmed{opacity:0.45;background:#f8fafc}
+
+/* ── CHIPS ── */
+.chip{display:inline-flex;align-items:center;padding:7px 13px;border-radius:999px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:12px;font-weight:600;cursor:pointer;margin:3px;transition:all 0.12s;font-family:inherit;user-select:none}
+.chip:hover{border-color:#94a3b8}
+.chip.on{background:#0f172a;border-color:#0f172a;color:#fff}
+
+/* ── GG SCORE BUTTONS ── */
+.sb{border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#94a3b8;font-weight:700;font-size:9px;cursor:pointer;padding:5px 2px;min-width:52px;text-align:center;line-height:1.4;transition:all 0.1s;font-family:inherit}
+
+/* GG colors — order: 88 01 02 03 04 05 06 | 07 09 10 */
+.sb.g88{background:#0f172a;border-color:#334155;color:#94a3b8}
+.sb.g01{background:#450a0a;border-color:#991b1b;color:#fca5a5}
+.sb.g02{background:#431407;border-color:#c2410c;color:#fdba74}
+.sb.g03{background:#422006;border-color:#b45309;color:#fcd34d}
+.sb.g04{background:#1a2e05;border-color:#4d7c0f;color:#bef264}
+.sb.g05{background:#052e16;border-color:#16a34a;color:#86efac}
+.sb.g06{background:#042f1e;border-color:#059669;color:#6ee7b7}
+.sb.g07{background:#1e1b4b;border-color:#4338ca;color:#a5b4fc}
+.sb.g09{background:#f1f5f9;border-color:#cbd5e1;color:#64748b}
+.sb.g10{background:#1c1917;border-color:#78716c;color:#d6d3d1}
+
+/* ── TABS ── */
+.tab-row{display:flex;background:#f1f5f9;border-radius:12px;padding:3px;gap:2px;margin-bottom:14px}
+.tab-btn{flex:1;padding:8px;border:none;background:transparent;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;border-radius:9px;transition:all 0.15s;font-family:inherit}
+.tab-btn.active{background:#fff;color:#0f172a;box-shadow:0 1px 4px rgba(0,0,0,0.1);font-weight:700}
+
+/* ── SYNC BAR ── */
+.sync-bar{font-size:11px;font-weight:600;padding:6px 18px;text-align:center;background:#0f172a;color:#64748b}
+.sync-bar.ok{background:#f0fdf4;color:#15803d;border-bottom:1px solid #86efac}
+.sync-bar.err{background:#fff1f2;color:#be123c;border-bottom:1px solid #fda4af}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;display:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+
+/* ── SEARCH BOX ── */
+.sbox{background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px;border:1.5px solid #e2e8f0;display:flex;align-items:center;gap:8px}
+.sbox input{border:none;background:transparent;padding:0;font-size:13px;font-weight:500;flex:1}
+
+/* ── ROOM BADGE ── */
+.room-badge{background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:8px 12px;min-width:55px;text-align:center;flex-shrink:0;cursor:pointer;transition:border-color 0.15s}
+.room-badge:hover{border-color:#93c5fd}
+
+/* ── PROGRESS TABLE ── */
+.prog-table{width:100%;border-collapse:collapse;font-size:11px}
+.prog-table th{padding:4px 3px 10px;font-size:9px;font-weight:700;color:#94a3b8;text-align:center}
+.prog-table td{padding:3px 2px;text-align:center;vertical-align:middle}
+
+/* ── STAFF BTN ── */
+.stf-btn{padding:6px 14px;border-radius:999px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.12s;font-family:inherit}
+.stf-btn.apt{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
+.stf-btn.apta{background:#faf5ff;color:#7c3aed;border-color:#c4b5fd}
+
+/* ── REVEAL BTN ── */
+.reveal-btn{display:inline-flex;align-items:center;gap:3px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:10px;color:#7c3aed;font-weight:600;user-select:none}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen" style="min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);display:flex;align-items:center;justify-content:center;padding:24px">
+  <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:40px 32px;max-width:380px;width:100%;text-align:center">
+    <div style="width:60px;height:60px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 18px;box-shadow:0 8px 24px rgba(56,189,248,0.3)">🏥</div>
+    <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-0.8px">PT Chart</div>
+    <div style="font-size:13px;color:#64748b;margin-bottom:32px;font-weight:500">Physical Therapy Patient Management</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;text-align:left">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px">Your Name</div>
+        <input id="login-name" placeholder="e.g. Kim PT" autocomplete="name" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px" oninput="document.getElementById('login-name').style.color='#fff'">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px">Team Password</div>
+        <input id="login-pw" type="password" placeholder="Enter password" autocomplete="current-password" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:20px;justify-content:center">
+      <input type="checkbox" id="remember-me" checked style="width:16px;height:16px;accent-color:#38bdf8">
+      <span style="font-size:12px;color:#64748b;font-weight:500">Keep me signed in</span>
+    </label>
+    <button onclick="doLogin()" style="background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:13px 0;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;width:100%;font-family:inherit;letter-spacing:0.2px;box-shadow:0 4px 16px rgba(56,189,248,0.35)">Sign In →</button>
+    <div id="login-err" style="margin-top:12px;font-size:12px;color:#f87171;display:none;font-weight:600"></div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app-screen" style="display:none">
+  <div class="hdr">
+    <div class="logo">PT<span class="logo-dot">·</span>Chart</div>
+    <div class="nav-wrap">
+      <button class="nav-btn active" onclick="nav('list')">Patients</button>
+      <button class="nav-btn" onclick="nav('idt')">IDT</button>
+      <button class="nav-btn" onclick="nav('settings')">Settings</button>
+    </div>
+  </div>
+  <div id="sync-bar" class="sync-bar" style="display:none"></div>
+  <div id="main"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const API_URL='https://script.google.com/macros/s/AKfycbwHx0bMldzMQuSK4gCmO8iN86JHv_RscoPwma2mvPJZGHpdJmWIE6FOIpVJaCzj4435/exec';
+const TEAM_PW='pamocoee',ADMIN_PW='pamocoee_admin';
+let currentUser='',isAdmin=false;
+let revealedNames={},patients=[],staff=[];
+let settings=JSON.parse(localStorage.getItem('ptc_settings3')||'{"hideDays":3}');
+
+// ─── NAME PRIVACY ─────────────────────────────────────────
+function toInitials(n){if(!n)return'';return n.trim().split(/\s+/).map(w=>w[0]?w[0].toUpperCase()+'.':'').join('');}
+function ob(s){try{return btoa(encodeURIComponent(s));}catch{return s;}}
+function deob(s){try{return decodeURIComponent(atob(s));}catch{return s;}}
+function dn(p){if(!p)return'?';if(isAdmin||revealedNames[p.id])return deob(p._nameEnc||'')||p.initials||'?';return p.initials||'?';}
+function revealName(id){revealedNames[id]=!revealedNames[id];render();}
+function revBtn(p){const r=isAdmin||revealedNames[p.id];return`<span class="reveal-btn" onclick="event.stopPropagation();revealName(${p.id})">${r?'🙈':'👁'} ${r?'Hide':'Reveal'}</span>`;}
+
+// ─── DATES ───────────────────────────────────────────────
+function today(){return new Date().toISOString().slice(0,10);}
+function toDateStr(v){if(!v)return'';const s=String(v);if(s.length>=10)return s.slice(0,10);return s;}
+function daysDiff(ds){if(!ds)return null;const s=toDateStr(ds);return Math.floor((new Date()-new Date(s+'T12:00:00'))/86400000);}
+function isActive(p){if(p.dischargeTBD||!p.dischargeDate)return true;const d=daysDiff(p.dischargeDate);return d===null||d<(settings.hideDays||3);}
+function isDimmed(p){if(p.dischargeTBD||!p.dischargeDate)return false;const d=daysDiff(p.dischargeDate);return d!==null&&d>=0&&d<(settings.hideDays||3);}
+
+// ─── AUTH ─────────────────────────────────────────────────
+function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  const rem=document.getElementById('remember-me').checked;
+  if(!name){showErr('Please enter your name');return;}
+  if(pw===ADMIN_PW){isAdmin=true;localStorage.setItem('ptc_admin','1');}
+  else if(pw!==TEAM_PW){showErr('Incorrect password');return;}
+  currentUser=name;
+  if(rem){localStorage.setItem('ptc_user',name);localStorage.setItem('ptc_rem','1');}
+  else{sessionStorage.setItem('ptc_user',name);localStorage.removeItem('ptc_user');}
+  startApp();
+}
+function showErr(m){const e=document.getElementById('login-err');e.textContent=m;e.style.display='block';}
+function startApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';loadAllData();}
+function signOut(){localStorage.removeItem('ptc_user');localStorage.removeItem('ptc_admin');localStorage.removeItem('ptc_rem');sessionStorage.removeItem('ptc_user');location.reload();}
+window.onload=()=>{
+  const saved=localStorage.getItem('ptc_user')||sessionStorage.getItem('ptc_user');
+  if(saved&&localStorage.getItem('ptc_rem')==='1'){
+    currentUser=saved;isAdmin=localStorage.getItem('ptc_admin')==='1';startApp();return;
+  }
+  if(saved)document.getElementById('login-name').value=saved;
+};
+
+// ─── API ─────────────────────────────────────────────────
+async function api(method,data){
+  try{
+    if(method==='GET'){
+      const r=await fetch(API_URL+'?action=getAll',{redirect:'follow'});
+      const txt=await r.text();try{return JSON.parse(txt);}catch{return null;}
+    }
+    const r=await fetch(API_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)});
+    const txt=await r.text();try{return JSON.parse(txt);}catch{return null;}
+  }catch(e){setSyncBar('⚠ Connection error','err');return null;}
+}
+function setSyncBar(msg,type=''){
+  const b=document.getElementById('sync-bar');
+  b.textContent=msg;b.style.display='block';b.className='sync-bar'+(type?' '+type:'');
+  if(type==='ok')setTimeout(()=>b.style.display='none',2500);
+}
+async function loadAllData(){
+  setSyncBar('⟳ Loading...');
+  const data=await api('GET');
+  if(data&&!data.error){
+    const em={};(data.evals||[]).forEach(ev=>{const pid=String(ev.patientId);if(!em[pid])em[pid]=[];em[pid].push(ev);});
+    patients=(data.patients||[]).map(p=>({...p,evaluations:(em[String(p.id)]||[]).sort((a,b)=>String(a.date).slice(0,10).localeCompare(String(b.date).slice(0,10)))}));
+    staff=data.staff||[];
+    localStorage.setItem('ptc_v12',JSON.stringify(patients));
+    localStorage.setItem('ptc_stf12',JSON.stringify(staff));
+    setSyncBar('✓ Up to date','ok');
+  }else{
+    try{patients=JSON.parse(localStorage.getItem('ptc_v12')||'[]');}catch{patients=[];}
+    try{staff=JSON.parse(localStorage.getItem('ptc_stf12')||'[]');}catch{staff=[];}
+    setSyncBar('⚠ Offline — cached data','err');
+  }
+  render();
+}
+async function syncSave(action,payload){
+  localStorage.setItem('ptc_v12',JSON.stringify(patients));
+  setSyncBar('⟳ Saving...');
+  const res=await api('POST',{action,...payload});
+  if(res&&res.success)setSyncBar('✓ Saved','ok');
+  else setSyncBar('⚠ Save failed — cached locally','err');
+}
+
+// ─── CONSTANTS ────────────────────────────────────────────
+// Order: 88 | 01 02 03 04 05 06 | 07 09 10
+const GG_SCORES=[
+  {code:'88',label:'Not Attempted (medical/safety)',short:'N/A-Med',grp:'main'},
+  {code:'01',label:'Dependent',short:'Dependent',grp:'main'},
+  {code:'02',label:'Substantial / Max Assist',short:'Max Assist',grp:'main'},
+  {code:'03',label:'Moderate / Min Assist',short:'Mod-Min',grp:'main'},
+  {code:'04',label:'Supervision / CGA',short:'Supervision',grp:'main'},
+  {code:'05',label:'Setup / Clean-up Assist',short:'Setup',grp:'main'},
+  {code:'06',label:'Independent',short:'Independent',grp:'main'},
+  {code:'07',label:'Patient Refused',short:'Refused',grp:'other'},
+  {code:'09',label:'Not Applicable (prior condition)',short:'Not Appl.',grp:'other'},
+  {code:'10',label:'Not Attempted (environmental)',short:'Not Att.',grp:'other'},
+];
+const GG_META={
+  '88':{bg:'#0f172a',bd:'#334155',tx:'#94a3b8'},
+  '01':{bg:'#450a0a',bd:'#991b1b',tx:'#fca5a5'},
+  '02':{bg:'#431407',bd:'#c2410c',tx:'#fdba74'},
+  '03':{bg:'#422006',bd:'#b45309',tx:'#fcd34d'},
+  '04':{bg:'#1a2e05',bd:'#4d7c0f',tx:'#bef264'},
+  '05':{bg:'#052e16',bd:'#16a34a',tx:'#86efac'},
+  '06':{bg:'#042f1e',bd:'#059669',tx:'#6ee7b7'},
+  '07':{bg:'#1e1b4b',bd:'#4338ca',tx:'#a5b4fc'},
+  '09':{bg:'#f1f5f9',bd:'#cbd5e1',tx:'#64748b'},
+  '10':{bg:'#1c1917',bd:'#78716c',tx:'#d6d3d1'},
+};
+const EVAL_ITEMS=[
+  {key:'rolling',label:'Rolling',group:'Bed Mobility'},
+  {key:'lyingToSitting',label:'Lying → Sitting',group:'Bed Mobility'},
+  {key:'sitToLying',label:'Sit → Lying',group:'Bed Mobility'},
+  {key:'sitToStand',label:'Sit to Stand',group:'Transfer'},
+  {key:'bedToWC',label:'Bed → WC',group:'Transfer'},
+  {key:'wcToCar',label:'WC → Car',group:'Transfer'},
+  {key:'toiletTransfer',label:'Toilet Transfer',group:'Transfer'},
+  {key:'walk10Even',label:'10ft Even',group:'Ambulation'},
+  {key:'walk10Uneven',label:'10ft Uneven',group:'Ambulation'},
+  {key:'walk50',label:'50ft',group:'Ambulation'},
+  {key:'walk150',label:'150ft',group:'Ambulation'},
+  {key:'step1',label:'1 Step',group:'Ambulation'},
+  {key:'step4',label:'4 Steps',group:'Ambulation'},
+  {key:'step12',label:'12 Steps',group:'Ambulation'},
+  {key:'pickup',label:'Pickup',group:'Ambulation'},
+  {key:'wc50',label:'WC 50ft',group:'Wheelchair'},
+  {key:'wc150',label:'WC 150ft',group:'Wheelchair'},
+];
+const GROUPS=['Bed Mobility','Transfer','Ambulation','Wheelchair'];
+const GC={'Bed Mobility':'#0ea5e9','Transfer':'#a78bfa','Ambulation':'#16a34a','Wheelchair':'#f97316'};
+
+// Walking Aids — full list including Not Used, N/A + free text
+const WALKING_AIDS=['2WW','4WW','Walker','Straight Cane','Quad Cane','Axillary Crutches','Lofstrand Crutches','Not Used','N/A'];
+// Transfer Aids — full list
+const TRANSFER_AIDS=['Independent','Gait Belt','1-Person Assist','2-Person Assist','Pivot Transfer','Sara Steady','Hoyer Lift','Slide Board','Not Used','N/A'];
+// Orthotics
+const ORTHOTICS_LIST=['AFO','KAFO','TLSO','Knee Brace','Wrist Splint','Cervical Collar','Walker Boot','Compression Stocking','Custom Orthotic'];
+
+let curView='list',selId=null,curP=null,idtQ='',idtTab='tue',nsName='',nsRole='PT',selIdtId=null;
+let listTab='active',searchQ='';
+let formData=ep(),evalData=ee();
+
+// ─── HELPERS ─────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast2(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
+function sName(id){return(staff.find(s=>s.id==id)||{}).name||'—';}
+function sortedActive(){return patients.filter(isActive).sort((a,b)=>(parseInt(a.room)||9999)-(parseInt(b.room)||9999));}
+function sortedDischarged(){return patients.filter(p=>!isActive(p)).sort((a,b)=>(b.dischargeDate||'').localeCompare(a.dischargeDate||''));}
+function nav(v){curView=v;render();}
+function ep(){return{id:Date.now(),name:'',_nameEnc:'',initials:'',room:'',roomHistory:[],diagnoses:[],mainDiagnosis:'',subDiagnosis:'',precautions:'',firstEvalDate:'',evaluatorId:'',dischargeDate:'',dischargeTBD:true,idtDate:'',idtAuto:true,walkingAids:[],transferAids:[],walkingAidsNote:'',transferAidsNote:'',currentOrthotics:[],neededOrthotics:[],assessment:'',evaluations:[],admissions:[]};}
+function ee(){return{id:Date.now(),date:today(),evaluatorId:'',scores:{},notes:'',assessment:'',walkingAids:[],transferAids:[],walkingAidsNote:'',transferAidsNote:''};}
+function calcIDT(ds){if(!ds)return'';const s=toDateStr(ds);const d=new Date(s+'T12:00:00'),dow=d.getDay();let t=(dow>=0||dow<=2||dow===6)?2:4,diff=t-dow;if(diff<=0)diff+=7;const r=new Date(d);r.setDate(d.getDate()+diff);return r.toISOString().slice(0,10);}
+function idtDay(ds){if(!ds)return'';const s=toDateStr(ds);return['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(s+'T12:00:00').getDay()];}
+function ggNum(c){return{'06':6,'05':5,'04':4,'03':3,'02':2,'01':1}[c]||null;}
+function arrStr(a){return Array.isArray(a)?a.filter(Boolean).join(', '):(a||'');}
+function toArr(v){return Array.isArray(v)?v:(v?[v]:[]);}
+function toggleArr(a,v){a=toArr(a);return a.includes(v)?a.filter(x=>x!==v):[...a,v];}
+
+function getDxHistory(p){
+  const all=new Set();
+  if(p.mainDiagnosis)all.add(p.mainDiagnosis.trim());
+  if(p.subDiagnosis)all.add(p.subDiagnosis.trim());
+  toArr(p.diagnoses).forEach(d=>{if(d)all.add(d.trim());});
+  toArr(p.admissions).forEach(a=>{
+    if(a.mainDiagnosis)all.add(a.mainDiagnosis.trim());
+    if(a.subDiagnosis)all.add(a.subDiagnosis.trim());
+  });
+  return[...all].filter(Boolean);
+}
+
+// ─── CHIP TOGGLES ────────────────────────────────────────
+function toggleWA(v){formData.walkingAids=toggleArr(formData.walkingAids,v);render();}
+function toggleTA(v){formData.transferAids=toggleArr(formData.transferAids,v);render();}
+function toggleCO(v){formData.currentOrthotics=toggleArr(formData.currentOrthotics,v);render();}
+function toggleNO(v){formData.neededOrthotics=toggleArr(formData.neededOrthotics,v);render();}
+function toggleEWA(v){evalData.walkingAids=toggleArr(toArr(evalData.walkingAids),v);render();}
+function toggleETA(v){evalData.transferAids=toggleArr(toArr(evalData.transferAids),v);render();}
+
+function renderChips(opts,sel,fn){
+  sel=toArr(sel);
+  return`<div style="display:flex;flex-wrap:wrap;gap:2px">${opts.map(o=>{const on=sel.includes(o);return`<span class="chip ${on?'on':''}" onclick="${fn}('${o.replace(/'/g,"\\'")}')">${o}</span>`;}).join('')}</div>`;
+}
+
+function staffPicker(val,vpath){
+  if(!staff.length)return`<span style="font-size:12px;color:#94a3b8;font-weight:500">Add therapists in Settings first</span>`;
+  return staff.map(s=>{const a=String(val)===String(s.id);return`<button class="stf-btn ${a?(s.role==='PT'?'apt':'apta'):''}" onclick="${vpath}=${a?'\'\'':s.id};render()"><span style="font-size:9px;opacity:0.6;margin-right:2px">${s.role}</span>${esc(s.name)}</button>`;}).join('');}
+
+function filterBySearch(pts){
+  if(!searchQ)return pts;const q=searchQ.toLowerCase();
+  return pts.filter(p=>dn(p).toLowerCase().includes(q)||p.initials.toLowerCase().includes(q)||(p.room||'').includes(q)||(p.mainDiagnosis||'').toLowerCase().includes(q)||deob(p._nameEnc||'').toLowerCase().includes(q)||getDxHistory(p).join(' ').toLowerCase().includes(q));
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────
+function readmit(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  if(!confirm(`Readmit ${dn(p)}? Previous records will be preserved.`))return;
+  const admissions=toArr(p.admissions);
+  admissions.push({dischargeDate:p.dischargeDate,firstEvalDate:p.firstEvalDate,idtDate:p.idtDate,room:p.room,mainDiagnosis:p.mainDiagnosis,subDiagnosis:p.subDiagnosis,evaluations:[...(p.evaluations||[])],date:today()});
+  const allDx=getDxHistory(p);
+  const updated={...p,dischargeDate:'',dischargeTBD:true,firstEvalDate:'',idtDate:'',evaluations:[],admissions,diagnoses:allDx,mainDiagnosis:'',subDiagnosis:'',assessment:''};
+  patients=patients.map(x=>x.id===id?updated:x);
+  syncSave('savePatient',{patient:updated});
+  toast2('Readmitted ✓');render();
+}
+function changeRoom(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  const nr=prompt(`Change room for ${dn(p)}\nCurrent: ${p.room||'—'}\nNew room:`);
+  if(!nr||nr.trim()===p.room)return;
+  const history=toArr(p.roomHistory);
+  history.push({from:p.room||'—',to:nr.trim(),date:today()});
+  const updated={...p,room:nr.trim(),roomHistory:history};
+  patients=patients.map(x=>x.id===id?updated:x);
+  syncSave('savePatient',{patient:updated});
+  toast2(`Room → ${nr.trim()} ✓`);render();
+}
+
+// ─── SCRIPT BUILDER ──────────────────────────────────────
+function buildScript(p,ev,allEvals){
+  if(!ev)return null;
+  const sc=ev.scores||{};
+  function grp(keys){
+    const codes=keys.map(k=>sc[k]).filter(Boolean);if(!codes.length)return null;
+    const nums=codes.map(ggNum).filter(x=>x!==null);if(!nums.length)return{phrase:'not attempted',min:null,max:null};
+    const mn=Math.min(...nums),mx=Math.max(...nums);
+    const w=n=>({6:'independent',5:'independent with setup',4:'supervision / CGA',3:'moderate to minimal assist',2:'substantial / max assist',1:'dependent'}[n]||'');
+    return{phrase:mn===mx?w(mn):`${w(mn)} to ${w(mx)}`,min:mn,max:mx};
+  }
+  const bed=grp(['rolling','lyingToSitting','sitToLying']),tx=grp(['sitToStand','bedToWC','wcToCar','toiletTransfer']);
+  const amb=grp(['walk10Even','walk10Uneven','walk50','walk150','step1','step4','step12','pickup']),wc=grp(['wc50','wc150']);
+  const curWA=arrStr(toArr(ev.walkingAids).length?ev.walkingAids:p.walkingAids)||(ev.walkingAidsNote||'');
+  const curTA=arrStr(toArr(ev.transferAids).length?ev.transferAids:p.transferAids)||(ev.transferAidsNote||'');
+  let waChange='',taChange='';
+  if(allEvals&&allEvals.length>1){
+    const prev=allEvals.filter(e=>e.id!==ev.id&&e.date<=ev.date);
+    if(prev.length){
+      const pe=prev[prev.length-1];
+      const pWA=arrStr(toArr(pe.walkingAids).length?pe.walkingAids:p.walkingAids);
+      const pTA=arrStr(toArr(pe.transferAids).length?pe.transferAids:p.transferAids);
+      if(pWA&&curWA&&pWA!==curWA)waChange=pWA;
+      if(pTA&&curTA&&pTA!==curTA)taChange=pTA;
+    }
+  }
+  const parts=[];
+  if(bed)parts.push(`Bed mobility — ${bed.phrase}`);
+  if(tx){let s=`Transfers — ${tx.phrase}`;if(curTA)s+=` (${curTA}${taChange?`, prev: ${taChange}`:''})`;parts.push(s);}
+  if(amb){let s=`Ambulation — ${amb.phrase}`;if(curWA)s+=` (${curWA}${waChange?`, prev: ${waChange}`:''})`;parts.push(s);}
+  if(wc)parts.push(`Wheelchair — ${wc.phrase}`);
+  const allMin=[bed,tx,amb,wc].filter(x=>x&&x.min!==null).map(x=>x.min);
+  const om=allMin.length?Math.min(...allMin):null;
+  const name=dn(p);let lead='';
+  if(om!==null){if(om>=5)lead=`${name} is largely independent.`;else if(om>=4)lead=`${name} requires supervision across most tasks.`;else if(om>=3)lead=`${name} requires moderate assistance.`;else if(om>=2)lead=`${name} requires substantial to max assist.`;else lead=`${name} is dependent across functional tasks.`;}
+  const flag=curTA&&(curTA.toLowerCase().includes('hoyer')||curTA.toLowerCase().includes('sara'))&&p.dischargeTBD?`${curTA} required — not confirmed at home.`:'';
+  const no=toArr(p.neededOrthotics);
+  return{lead,parts,flag,precFlag:p.precautions||'',needed:no.length?no.join(', '):'',aidsChanged:waChange||taChange};
+}
+
+function renderScriptBox(s){
+  if(!s||!s.parts.length)return'';
+  return`<div style="background:#faf5ff;border:2px solid #e9d5ff;border-radius:16px;padding:18px;margin-top:12px">
+    <div style="font-size:10px;font-weight:700;color:#7c3aed;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;gap:7px">
+      <span style="width:22px;height:22px;background:#7c3aed;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">📋</span> IDT Script
+    </div>
+    ${s.lead?`<div style="font-size:14px;color:#3b0764;font-weight:600;margin-bottom:12px;line-height:1.7;padding:11px 15px;background:#fff;border-radius:11px;border:1.5px solid #e9d5ff">"${s.lead}"</div>`:''}
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${s.parts.map(p=>`<div style="font-size:12px;color:#4c1d95;padding:8px 13px;background:#fff;border-radius:9px;border:1.5px solid #e9d5ff;font-weight:500;line-height:1.5">• ${p}</div>`).join('')}
+      ${s.aidsChanged?`<div style="font-size:12px;color:#92400e;padding:8px 13px;background:#fffbeb;border-radius:9px;border:1.5px solid #fde68a;font-weight:500">⚡ Equipment changed since last eval</div>`:''}
+      ${s.precFlag?`<div style="font-size:12px;color:#9a3412;padding:8px 13px;background:#fff7ed;border-radius:9px;border:1.5px solid #fed7aa;font-weight:500">⚠️ Precautions: ${esc(s.precFlag)}</div>`:''}
+      ${s.needed?`<div style="font-size:12px;color:#1e40af;padding:8px 13px;background:#eff6ff;border-radius:9px;border:1.5px solid #bfdbfe;font-weight:500">🏠 Needed for discharge: ${esc(s.needed)}</div>`:''}
+      ${s.flag?`<div style="font-size:12px;color:#9f1239;padding:8px 13px;background:#fff1f2;border-radius:9px;border:1.5px solid #fecdd3;font-weight:500">⚠️ ${esc(s.flag)}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderProgressTable(evals){
+  if(evals.length<2)return'';
+  const show=evals.slice(-4);
+  let h=`<div style="overflow-x:auto"><table class="prog-table"><thead><tr>
+    <th style="text-align:left;padding:4px 8px 10px 0;min-width:90px">Item</th>
+    ${show.map((ev,i)=>`<th style="color:${i===show.length-1?'#0f172a':'#94a3b8'};min-width:54px;font-size:${i===show.length-1?'10':'9'}px">${ev.date.slice(5)}</th>`).join('')}
+    <th style="min-width:28px">Δ</th>
+  </tr></thead><tbody>`;
+  let lg='';
+  EVAL_ITEMS.forEach((item,idx)=>{
+    const hasAny=show.some(ev=>ev.scores?.[item.key]);if(!hasAny)return;
+    if(item.group!==lg){lg=item.group;h+=`<tr><td colspan="${show.length+2}" style="padding:9px 0 4px;font-size:9px;font-weight:700;color:${GC[item.group]};text-transform:uppercase;letter-spacing:0.5px">${item.group}</td></tr>`;}
+    h+=`<tr style="background:${idx%2===0?'#f8fafc':'#fff'}"><td style="padding:4px 6px 4px 0;color:#475569;font-size:11px;font-weight:500;white-space:nowrap">${item.label}</td>`;
+    show.forEach((ev,i)=>{
+      const code=ev.scores?.[item.key],m=code?GG_META[code]:null,isLast=i===show.length-1;
+      h+=`<td><div style="display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:3px 5px;border-radius:7px;background:${code?m.bg:'transparent'};border:${code?`1.5px solid ${m.bd}`:'none'};font-size:11px;font-weight:800;color:${code?m.tx:'#e2e8f0'};${isLast&&code?'box-shadow:0 0 0 2px #e2e8f0':''}">${code||'—'}</div></td>`;
+    });
+    const codes=show.map(ev=>ev.scores?.[item.key]).filter(Boolean);
+    const first=ggNum(codes[0]),last=ggNum(codes[codes.length-1]);
+    let arrow='<span style="color:#e2e8f0">—</span>';
+    if(first!==null&&last!==null&&codes.length>1){if(last>first)arrow=`<span style="color:#16a34a;font-weight:800;font-size:14px">↑</span>`;else if(last<first)arrow=`<span style="color:#dc2626;font-weight:800;font-size:14px">↓</span>`;else arrow=`<span style="color:#94a3b8;font-size:14px">→</span>`;}
+    h+=`<td>${arrow}</td></tr>`;
+  });
+  // Equipment rows
+  const hasWA=show.some(ev=>toArr(ev.walkingAids).length||ev.walkingAidsNote);
+  const hasTA=show.some(ev=>toArr(ev.transferAids).length||ev.transferAidsNote);
+  if(hasWA||hasTA){
+    h+=`<tr><td colspan="${show.length+2}" style="padding:9px 0 4px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Equipment</td></tr>`;
+    if(hasWA){
+      h+=`<tr style="background:#f8fafc"><td style="padding:4px 6px 4px 0;color:#475569;font-size:11px;font-weight:500">🚶 Walking</td>`;
+      show.forEach((ev,i)=>{
+        const v=(arrStr(ev.walkingAids)||(ev.walkingAidsNote||''));
+        const prev=i>0?(arrStr(show[i-1].walkingAids)||(show[i-1].walkingAidsNote||'')):null;
+        const changed=prev&&v&&prev!==v;
+        h+=`<td><div style="font-size:9px;color:${changed?'#b45309':i===show.length-1?'#0f172a':'#94a3b8'};font-weight:${changed||i===show.length-1?'700':'400'};text-align:center;white-space:nowrap">${esc(v)||'—'}</div></td>`;
+      });
+      const fw=arrStr(show[0].walkingAids),lw=arrStr(show[show.length-1].walkingAids);
+      h+=`<td>${fw&&lw&&fw!==lw?'<span style="color:#f59e0b;font-size:14px">⚡</span>':'<span style="color:#e2e8f0">—</span>'}</td></tr>`;
+    }
+    if(hasTA){
+      h+=`<tr><td style="padding:4px 6px 4px 0;color:#475569;font-size:11px;font-weight:500">🔄 Transfer</td>`;
+      show.forEach((ev,i)=>{
+        const v=(arrStr(ev.transferAids)||(ev.transferAidsNote||''));
+        const prev=i>0?(arrStr(show[i-1].transferAids)||(show[i-1].transferAidsNote||'')):null;
+        const changed=prev&&v&&prev!==v;
+        h+=`<td><div style="font-size:9px;color:${changed?'#b45309':i===show.length-1?'#0f172a':'#94a3b8'};font-weight:${changed||i===show.length-1?'700':'400'};text-align:center;white-space:nowrap">${esc(v)||'—'}</div></td>`;
+      });
+      const ft=arrStr(show[0].transferAids),lt=arrStr(show[show.length-1].transferAids);
+      h+=`<td>${ft&&lt&&ft!==lt?'<span style="color:#f59e0b;font-size:14px">⚡</span>':'<span style="color:#e2e8f0">—</span>'}</td></tr>`;
+    }
+  }
+  return h+'</tbody></table></div>';
+}
+
+// ─── GG SCORE TABLE ──────────────────────────────────────
+function renderGGTable(scores){
+  const mainSc=GG_SCORES.filter(g=>g.grp==='main');
+  const otherSc=GG_SCORES.filter(g=>g.grp==='other');
+  function colHead(g){const m=GG_META[g.code];return`<th style="padding:2px 2px 10px;text-align:center;min-width:50px">
+    <div style="background:${m.bg};border:1.5px solid ${m.bd};border-radius:9px;padding:5px 3px;line-height:1.3">
+      <div style="font-size:12px;font-weight:800;color:${m.tx}">${g.code}</div>
+      <div style="font-size:7px;color:${m.tx};opacity:0.85;font-weight:500;margin-top:1px">${g.short}</div>
+    </div></th>`;}
+  let h=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:0">
+    <thead><tr>
+      <th style="text-align:left;padding:4px 8px 10px 0;font-size:9px;font-weight:700;color:#94a3b8;min-width:96px">Item</th>
+      ${mainSc.map(colHead).join('')}
+      <th style="padding:0 4px;width:10px"><div style="width:2px;background:#e2e8f0;height:44px;margin:0 auto;border-radius:2px"></div></th>
+      ${otherSc.map(colHead).join('')}
+    </tr></thead><tbody>`;
+  GROUPS.forEach(group=>{
+    h+=`<tr><td colspan="${mainSc.length+otherSc.length+2}" style="padding:10px 0 5px;font-size:9px;font-weight:700;color:${GC[group]};text-transform:uppercase;letter-spacing:0.6px;border-top:1px solid #f1f5f9">${group}</td></tr>`;
+    EVAL_ITEMS.filter(i=>i.group===group).forEach((item,idx)=>{
+      h+=`<tr style="background:${idx%2===0?'#f8fafc':'#fff'}">
+        <td style="padding:4px 8px 4px 0;color:#475569;font-size:12px;font-weight:500;white-space:nowrap">${item.label}</td>`;
+      mainSc.forEach(gg=>{
+        const a=scores[item.key]===gg.code,m=GG_META[gg.code];
+        h+=`<td style="padding:2px;text-align:center"><button class="sb ${a?'g'+gg.code:''}" onclick="evalData.scores['${item.key}']='${a?'':gg.code}';render()">${a?'✓':gg.code}</button></td>`;
+      });
+      h+=`<td></td>`;
+      otherSc.forEach(gg=>{
+        const a=scores[item.key]===gg.code;
+        h+=`<td style="padding:2px;text-align:center"><button class="sb ${a?'g'+gg.code:''}" onclick="evalData.scores['${item.key}']='${a?'':gg.code}';render()">${a?'✓':gg.code}</button></td>`;
+      });
+      h+=`</tr>`;
+    });
+  });
+  return h+'</tbody></table></div>';
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function render(){
+  const m=document.getElementById('main');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{
+    b.classList.remove('active');
+    if((curView==='list'&&i===0)||(curView==='idt'&&i===1)||(curView==='settings'&&i===2))b.classList.add('active');
+  });
+  if(curView==='list')m.innerHTML=renderList();
+  else if(curView==='form')m.innerHTML=renderForm();
+  else if(curView==='eval')m.innerHTML=renderEval();
+  else if(curView==='detail')m.innerHTML=renderDetail();
+  else if(curView==='idt')m.innerHTML=renderIDT();
+  else if(curView==='settings')m.innerHTML=renderSettings();
+}
+
+function renderPatientCard(p,showDischarged=false){
+  const dimmed=isDimmed(p),daysAgo=daysDiff(p.dischargeDate),evCount=(p.evaluations||[]).length;
+  const wa=arrStr(p.walkingAids)||(p.walkingAidsNote||''),ta=arrStr(p.transferAids)||(p.transferAidsNote||'');
+  const rh=toArr(p.roomHistory),dxH=getDxHistory(p),name=dn(p);
+  return`<div class="pc ${dimmed?'dimmed':''}" onclick="openDetail(${p.id})">
+    ${dimmed?`<div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:10px;padding:6px 11px;background:#fffbeb;border-radius:9px;border:1px solid #fde68a">🌅 Discharged ${daysAgo}d ago — moves to Discharged in ${(settings.hideDays||3)-daysAgo}d</div>`:''}
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="room-badge" onclick="event.stopPropagation();changeRoom(${p.id})">
+        <div style="font-size:8px;color:#3b82f6;font-weight:700;letter-spacing:0.5px;text-transform:uppercase">Room</div>
+        <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2">${esc(p.room)||'—'}</div>
+        <div style="font-size:7px;color:#bfdbfe;margin-top:1px">tap to edit</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:2px">
+          <div style="font-size:16px;font-weight:700;color:#0f172a">${esc(name)}</div>
+          ${!isAdmin?revBtn(p):''}
+        </div>
+        <div style="font-size:12px;color:#64748b;font-weight:500;margin-bottom:3px">${esc(p.mainDiagnosis)||'No diagnosis'}${dxH.length>1?` <span style="color:#94a3b8;font-size:10px">+${dxH.length-1} more</span>`:''}</div>
+        ${wa?`<div style="font-size:10px;color:#475569">🚶 ${wa}</div>`:''}
+        ${ta?`<div style="font-size:10px;color:#475569">🔄 ${ta}</div>`:''}
+        ${p.idtDate&&!showDischarged?`<div style="font-size:10px;color:#7c3aed;font-weight:600;margin-top:3px">📅 IDT ${p.idtDate} (${idtDay(p.idtDate)})</div>`:''}
+        ${showDischarged&&p.dischargeDate?`<div style="font-size:10px;color:#94a3b8;margin-top:2px">Discharged ${p.dischargeDate} · ${daysAgo}d ago</div>`:''}
+        ${rh.length?`<div style="font-size:9px;color:#94a3b8;margin-top:2px">🏠 ${rh.map(r=>`${r.from}→${r.to}`).join(' · ')}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${evCount>0?`<span class="bdg" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac">×${evCount} eval</span>`:`<span class="bdg" style="background:#fff1f2;color:#be123c;border:1px solid #fda4af">No eval</span>`}
+        ${toArr(p.admissions).length>0?`<span class="bdg" style="background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff">×${toArr(p.admissions).length+1} admit</span>`:''}
+        ${p.dischargeTBD?`<span class="bdg" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0">DC TBD</span>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+      <button class="bg" onclick="event.stopPropagation();openEdit(${p.id})" style="padding:7px 14px;font-size:11px">✏️ Edit</button>
+      ${!showDischarged?`<button class="bs" onclick="event.stopPropagation();openEval(${p.id})" style="padding:7px 14px;font-size:11px">+ Evaluation</button>`:''}
+      ${showDischarged?`<button class="borange" onclick="event.stopPropagation();readmit(${p.id})" style="padding:7px 14px;font-size:11px">🔄 Readmit</button>`:''}
+      <button class="bd" onclick="event.stopPropagation();delPt(${p.id})" style="padding:7px 14px;font-size:11px">🗑 Delete</button>
+    </div>
+  </div>`;
+}
+
+function renderList(){
+  const active=filterBySearch(sortedActive()),discharged=filterBySearch(sortedDischarged());
+  return`<div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.8px">Patients</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:2px;font-weight:500">${isAdmin?'👑 Admin · ':''}${patients.length} total <button onclick="loadAllData()" style="background:none;border:none;color:#38bdf8;cursor:pointer;font-size:11px;font-weight:600;margin-left:6px;font-family:inherit">⟳ Sync</button></div>
+      </div>
+      <button class="bp" onclick="openNew()" style="padding:11px 20px;font-size:13px">+ New Patient</button>
+    </div>
+    <div class="sbox">
+      <span style="color:#cbd5e1;font-size:16px">🔍</span>
+      <input placeholder="Search by name, room, diagnosis..." value="${esc(searchQ)}" oninput="searchQ=this.value;render()" style="border:none;background:transparent;padding:0;font-size:13px;flex:1">
+      ${searchQ?`<button onclick="searchQ='';render()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:20px;line-height:1;font-family:inherit">×</button>`:''}
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn ${listTab==='active'?'active':''}" onclick="listTab='active';render()">Active (${sortedActive().length})</button>
+      <button class="tab-btn ${listTab==='discharged'?'active':''}" onclick="listTab='discharged';render()">Discharged (${sortedDischarged().length})</button>
+    </div>
+    ${listTab==='active'
+      ?(active.length?active.map(p=>renderPatientCard(p,false)).join(''):`<div style="text-align:center;padding:56px 20px;color:#94a3b8"><div style="font-size:40px;margin-bottom:12px">🏥</div><div style="font-weight:700;font-size:15px">${searchQ?'No results found':'No active patients'}</div><div style="font-size:12px;margin-top:5px">${searchQ?'Try a different search':'Tap + New Patient to get started'}</div></div>`)
+      :(discharged.length?discharged.map(p=>renderPatientCard(p,true)).join(''):`<div style="text-align:center;padding:56px 20px;color:#94a3b8"><div style="font-size:40px;margin-bottom:12px">📋</div><div style="font-weight:700;font-size:15px">No discharged patients yet</div></div>`)
+    }
+  </div>`;
+}
+
+function renderForm(){
+  const f=formData,isEdit=!!selId,dxH=isEdit?getDxHistory(f):[];
+  const cbHtml=(checked,color,onclick,label)=>`<label style="display:flex;align-items:center;gap:9px;cursor:pointer" onclick="${onclick}">
+    <div style="width:19px;height:19px;border-radius:6px;border:2px solid ${checked?color:'#e2e8f0'};background:${checked?color:'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s">
+      ${checked?`<svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`:''}
+    </div>
+    <span style="font-size:13px;color:#475569;font-weight:500">${label}</span>
+  </label>`;
+  return`<div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.5px">${isEdit?'Edit Patient':'New Patient'}</div>
+      <button class="bg" onclick="nav('list')" style="padding:8px 14px;font-size:11px">← Back</button>
+    </div>
+    <div class="card">
+      <div class="sec">Patient Information</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div><div class="lbl">Full Name *</div>
+          <input value="${isEdit?esc(deob(f._nameEnc)):''}" oninput="formData.name=this.value;formData.initials=toInitials(this.value);formData._nameEnc=ob(this.value);document.getElementById('initials-preview').textContent=formData.initials?'Stored as: '+formData.initials:'';" placeholder="John Smith" autocomplete="off">
+          <div id="initials-preview" style="margin-top:5px;font-size:11px;color:#7c3aed;font-weight:600">${f.initials?'Stored as: '+f.initials:''}</div>
+        </div>
+        <div><div class="lbl">Room</div><input value="${esc(f.room)}" oninput="formData.room=this.value" placeholder="101"></div>
+        <div><div class="lbl">Primary Diagnosis</div><input value="${esc(f.mainDiagnosis)}" oninput="formData.mainDiagnosis=this.value" placeholder="e.g. CVA, TKR, Hip Fx"></div>
+        <div><div class="lbl">Secondary Diagnosis</div><input value="${esc(f.subDiagnosis)}" oninput="formData.subDiagnosis=this.value" placeholder="e.g. DM, HTN"></div>
+        <div><div class="lbl">First Eval Date</div><input type="date" value="${f.firstEvalDate}" oninput="formData.firstEvalDate=this.value;if(formData.idtAuto){formData.idtDate=calcIDT(this.value);}render()"></div>
+        <div><div class="lbl">Discharge Date</div>
+          <div style="margin-bottom:8px">${cbHtml(f.dischargeTBD,'#64748b','formData.dischargeTBD=!formData.dischargeTBD;render()','TBD / Not Set')}</div>
+          ${!f.dischargeTBD?`<input type="date" value="${f.dischargeDate}" oninput="formData.dischargeDate=this.value">`:`<span class="bdg" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;font-size:11px">Date TBD</span>`}
+        </div>
+      </div>
+      ${dxH.length>1?`<div style="margin-bottom:12px"><div class="lbl">Diagnosis History</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${dxH.map(d=>`<span class="bdg" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">${esc(d)}</span>`).join('')}</div></div>`:''}
+      <div style="margin-bottom:12px"><div class="lbl">IDT Date</div>
+        <div style="margin-bottom:8px">${cbHtml(f.idtAuto,'#7c3aed','formData.idtAuto=!formData.idtAuto;if(formData.idtAuto&&formData.firstEvalDate){formData.idtDate=calcIDT(formData.firstEvalDate);}render()','Auto-calculate from First Eval Date')}</div>
+        ${f.idtAuto&&f.idtDate?`<div style="padding:11px 14px;background:#faf5ff;border-radius:10px;border:1.5px solid #e9d5ff;font-size:13px;color:#7c3aed;font-weight:700">📅 ${f.idtDate} (${idtDay(f.idtDate)})</div>`:
+        f.idtAuto&&!f.idtDate?`<div style="font-size:12px;color:#94a3b8;font-weight:500;padding:4px 0">Enter First Eval Date above to auto-calculate</div>`:
+        `<input type="date" value="${f.idtDate}" oninput="formData.idtDate=this.value">`}
+      </div>
+      <div style="margin-bottom:12px"><div class="lbl">Initial Evaluator</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${staffPicker(f.evaluatorId,'formData.evaluatorId')}</div></div>
+      <div><div class="lbl">Precautions</div><textarea oninput="formData.precautions=this.value" placeholder="Weight bearing status, fall risk, etc.">${esc(f.precautions)}</textarea></div>
+    </div>
+    <div class="card">
+      <div class="sec">🚶 Walking Aids</div>
+      ${renderChips(WALKING_AIDS,f.walkingAids,'toggleWA')}
+      <div style="margin-top:12px"><div class="lbl">Other / Free Text</div>
+        <input value="${esc(f.walkingAidsNote||'')}" oninput="formData.walkingAidsNote=this.value" placeholder="e.g. Contact guard, Custom device, Unsteady gait..." style="margin-top:4px">
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">🔄 Transfer Aids</div>
+      ${renderChips(TRANSFER_AIDS,f.transferAids,'toggleTA')}
+      <div style="margin-top:12px"><div class="lbl">Other / Free Text</div>
+        <input value="${esc(f.transferAidsNote||'')}" oninput="formData.transferAidsNote=this.value" placeholder="e.g. 2-person w/ gait belt, Mechanical lift rental..." style="margin-top:4px">
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">🦾 Orthotics / Bracing</div>
+      <div class="lbl" style="margin-bottom:7px">Currently Has</div>
+      ${renderChips(ORTHOTICS_LIST,f.currentOrthotics,'toggleCO')}
+      <div class="lbl" style="margin-top:16px;margin-bottom:7px">Needed for Discharge</div>
+      ${renderChips(ORTHOTICS_LIST,f.neededOrthotics,'toggleNO')}
+    </div>
+    <div class="card">
+      <div class="sec">📝 Assessment <span style="font-size:9px;color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <textarea oninput="formData.assessment=this.value" placeholder="Clinical impression, rehab potential, goals, home setup concerns..." style="min-height:80px">${esc(f.assessment)}</textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="bp" onclick="commitPt()" style="padding:11px 22px">Save Patient</button>
+      <button class="bg" onclick="nav('list')" style="padding:11px 18px">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function renderEval(){
+  const e=evalData,filled=Object.values(e.scores||{}).filter(Boolean).length;
+  const script=curP?buildScript(curP,e,curP.evaluations):null;
+  return`<div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.5px">New Evaluation</div>
+        <div style="font-size:12px;color:#38bdf8;font-weight:600;margin-top:2px">${esc(dn(curP))} · Room ${esc(curP?.room)}</div>
+      </div>
+      <button class="bg" onclick="openDetail2()" style="padding:8px 14px;font-size:11px">← Back</button>
+    </div>
+    <div class="card">
+      <div class="g2">
+        <div><div class="lbl">Date</div><input type="date" value="${e.date}" oninput="evalData.date=this.value"></div>
+        <div><div class="lbl">Therapist</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">${staffPicker(e.evaluatorId,'evalData.evaluatorId')}</div></div>
+      </div>
+    </div>
+    <div class="card" style="background:#0f172a;border-color:#1e293b">
+      <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:11px;text-transform:uppercase;letter-spacing:0.8px">GG Score Reference</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${GG_SCORES.map(g=>{const m=GG_META[g.code];return`<div style="display:flex;align-items:center;gap:7px;background:${m.bg};border:1.5px solid ${m.bd};border-radius:10px;padding:6px 11px"><span style="font-size:13px;font-weight:800;color:${m.tx}">${g.code}</span><span style="font-size:11px;color:${m.tx};opacity:0.9;font-weight:500">${g.label}</span></div>`;}).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="sec" style="margin-bottom:0">GG Scores</div>
+        <span class="bdg" style="background:${filled>0?'#f0fdf4':'#f8fafc'};color:${filled>0?'#15803d':'#94a3b8'};border:1px solid ${filled>0?'#86efac':'#e2e8f0'}">${filled} / ${EVAL_ITEMS.length} scored</span>
+      </div>
+      ${renderGGTable(e.scores)}
+    </div>
+    <div class="card">
+      <div class="sec">🚶 Walking Aids <span style="font-size:9px;color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0">(update if changed)</span></div>
+      ${renderChips([...WALKING_AIDS],toArr(e.walkingAids),'toggleEWA')}
+      ${arrStr(curP?.walkingAids)&&arrStr(e.walkingAids)&&arrStr(e.walkingAids)!==arrStr(curP?.walkingAids)?`<div style="font-size:11px;color:#b45309;margin-top:8px;font-weight:600;padding:6px 12px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a">⚡ Changed from: ${arrStr(curP?.walkingAids)}</div>`:''}
+      <div style="margin-top:12px"><div class="lbl">Other / Free Text</div>
+        <input value="${esc(e.walkingAidsNote||'')}" oninput="evalData.walkingAidsNote=this.value" placeholder="e.g. Contact guard, Unsteady on stairs, Not applicable..." style="margin-top:4px">
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">🔄 Transfer Aids <span style="font-size:9px;color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0">(update if changed)</span></div>
+      ${renderChips([...TRANSFER_AIDS],toArr(e.transferAids),'toggleETA')}
+      ${arrStr(curP?.transferAids)&&arrStr(e.transferAids)&&arrStr(e.transferAids)!==arrStr(curP?.transferAids)?`<div style="font-size:11px;color:#b45309;margin-top:8px;font-weight:600;padding:6px 12px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a">⚡ Changed from: ${arrStr(curP?.transferAids)}</div>`:''}
+      <div style="margin-top:12px"><div class="lbl">Other / Free Text</div>
+        <input value="${esc(e.transferAidsNote||'')}" oninput="evalData.transferAidsNote=this.value" placeholder="e.g. 2-person w/ gait belt, Mechanical lift, Not applicable..." style="margin-top:4px">
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">📝 Assessment <span style="font-size:9px;color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <textarea oninput="evalData.assessment=this.value" placeholder="Clinical impression, progress, goals update..." style="min-height:70px">${esc(e.assessment)}</textarea>
+    </div>
+    <div class="card">
+      <div class="sec">Notes</div>
+      <textarea oninput="evalData.notes=this.value" placeholder="Equipment needs, home setup concerns, discharge barriers...">${esc(e.notes)}</textarea>
+    </div>
+    ${script&&script.parts.length?renderScriptBox(script):''}
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="bs" onclick="commitEval()" style="padding:11px 22px">Save Evaluation</button>
+      <button class="bg" onclick="openDetail2()" style="padding:11px 18px">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function renderDetail(){
+  const p=patients.find(x=>x.id===curP?.id)||curP;if(!p)return'<div class="wrap"></div>';
+  const evals=p.evaluations||[],lastEv=evals[evals.length-1];
+  const wa=arrStr(p.walkingAids)||(p.walkingAidsNote||''),ta=arrStr(p.transferAids)||(p.transferAidsNote||'');
+  const co=toArr(p.currentOrthotics),no=toArr(p.neededOrthotics),rh=toArr(p.roomHistory),admissions=toArr(p.admissions);
+  const dxH=getDxHistory(p),isDischarged=!isActive(p),name=dn(p);
+  return`<div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px">
+      <div>
+        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+          <div style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.8px">${esc(name)}</div>
+          ${!isAdmin?revBtn(p):''}
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:4px;flex-wrap:wrap">
+          <span style="font-size:12px;color:#64748b;font-weight:600">Room ${esc(p.room)||'—'}</span>
+          <button onclick="changeRoom(${p.id})" style="background:none;border:none;color:#38bdf8;cursor:pointer;font-size:11px;font-weight:600;padding:0;font-family:inherit">change</button>
+          <span style="color:#e2e8f0">·</span>
+          <span style="font-size:12px;color:#64748b;font-weight:500">${esc(p.mainDiagnosis)||'No diagnosis'}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0">
+        ${isDischarged?`<button class="borange" onclick="readmit(${p.id})" style="padding:8px 14px;font-size:11px">🔄 Readmit</button>`:`<button class="bs" onclick="openEval(${p.id})" style="padding:8px 14px;font-size:11px">+ Eval</button>`}
+        <button class="bg" onclick="openEdit(${p.id})" style="padding:8px 14px;font-size:11px">Edit</button>
+        <button class="bg" onclick="nav('list')" style="padding:8px 14px;font-size:11px">← List</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">Patient Info</div>
+      <div class="g3" style="margin-bottom:14px">
+        ${[['First Eval',p.firstEvalDate||'—'],['Discharge',p.dischargeTBD?'TBD':p.dischargeDate||'—'],['IDT',p.idtDate?(p.idtDate+' ('+idtDay(p.idtDate)+')'):'—']].map(([k,v])=>`<div><div class="lbl">${k}</div><div style="font-size:12px;font-weight:700;color:#0f172a;margin-top:2px">${esc(v)}</div></div>`).join('')}
+      </div>
+      ${dxH.length>1?`<div style="margin-bottom:12px"><div class="lbl">All Diagnoses</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${dxH.map(d=>`<span class="bdg" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">${esc(d)}</span>`).join('')}</div></div>`:''}
+      ${wa?`<div style="margin-bottom:10px"><div class="lbl">🚶 Walking Aids</div><div style="font-size:13px;font-weight:600;color:#0f172a;margin-top:3px">${esc(wa)}</div></div>`:''}
+      ${ta?`<div style="margin-bottom:10px"><div class="lbl">🔄 Transfer Aids</div><div style="font-size:13px;font-weight:600;color:#0f172a;margin-top:3px">${esc(ta)}</div></div>`:''}
+      ${co.length?`<div style="margin-bottom:10px"><div class="lbl">🦾 Current Orthotics</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${co.map(x=>`<span class="bdg" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac">${x}</span>`).join('')}</div></div>`:''}
+      ${no.length?`<div style="margin-bottom:10px"><div class="lbl">📋 Needed for Discharge</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px">${no.map(x=>`<span class="bdg" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe">${x}</span>`).join('')}</div></div>`:''}
+      ${rh.length?`<div style="margin-bottom:4px"><div class="lbl">Room History</div><div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500">${rh.map(r=>`${r.from} → ${r.to} (${r.date})`).join(' · ')}</div></div>`:''}
+      ${p.precautions?`<div style="margin-top:12px;padding:11px 14px;background:#fff1f2;border-radius:12px;border-left:3px solid #f43f5e"><div style="font-size:9px;font-weight:700;color:#f43f5e;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">⚠️ Precautions</div><div style="font-size:13px;color:#9f1239;font-weight:500">${esc(p.precautions)}</div></div>`:''}
+      ${p.assessment?`<div style="margin-top:10px;padding:11px 14px;background:#f0fdf4;border-radius:12px;border-left:3px solid #22c55e"><div style="font-size:9px;font-weight:700;color:#166534;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">📝 Assessment</div><div style="font-size:13px;color:#166534;font-weight:500">${esc(p.assessment)}</div></div>`:''}
+    </div>
+    ${admissions.length?`<div class="card"><div class="sec">Previous Admissions (${admissions.length})</div>${admissions.map((a,i)=>`<div style="padding:11px 0;border-bottom:1px solid #f1f5f9"><div style="font-size:13px;font-weight:700;color:#0f172a">Admission ${i+1} · Room ${a.room||'—'}</div><div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500">${esc(a.mainDiagnosis)||'—'} · DC: ${a.dischargeDate||'—'} · ${(a.evaluations||[]).length} eval${(a.evaluations||[]).length!==1?'s':''}</div></div>`).join('')}</div>`:''}
+    ${!evals.length
+      ?`<div class="card" style="text-align:center;padding:40px 20px;color:#94a3b8"><div style="font-size:36px;margin-bottom:12px">📋</div><div style="font-weight:700;font-size:14px">No evaluations for this admission</div>${!isDischarged?`<button class="bs" style="margin-top:14px;padding:10px 22px" onclick="openEval(${p.id})">Add First Evaluation</button>`:''}</div>`
+      :`<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="sec" style="margin-bottom:0">Progress — ${evals.length} eval${evals.length!==1?'s':''}</div>
+          <div style="font-size:11px;color:#94a3b8;font-weight:500">${evals[0].date.slice(5)} → ${evals[evals.length-1].date.slice(5)}</div>
+        </div>
+        ${evals.length>1?renderProgressTable(evals):(()=>{
+          let h='';GROUPS.forEach(g=>{
+            const items=EVAL_ITEMS.filter(i=>i.group===g&&lastEv?.scores?.[i.key]);if(!items.length)return;
+            h+=`<div style="margin-bottom:14px"><div style="font-size:9px;font-weight:700;color:${GC[g]};margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">${g}</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+            items.forEach(item=>{
+              const s=lastEv.scores[item.key],m=GG_META[s]||{};const gl=GG_SCORES.find(x=>x.code===s);
+              h+=`<div style="background:${m.bg||'#f8fafc'};border:1.5px solid ${m.bd||'#e2e8f0'};border-radius:11px;padding:10px 13px;min-width:90px">
+                <div style="font-size:9px;color:#94a3b8;margin-bottom:4px;font-weight:500">${item.label}</div>
+                <div style="font-size:18px;font-weight:900;color:${m.tx||'#0f172a'};line-height:1">${s}</div>
+                <div style="font-size:9px;color:${m.tx||'#94a3b8'};opacity:0.9;margin-top:2px;font-weight:500">${gl?.short||''}</div>
+              </div>`;
+            });
+            h+=`</div></div>`;
+          });return h;
+        })()}
+        ${lastEv?.assessment?`<div style="margin-top:12px;padding:11px 14px;background:#f0fdf4;border-radius:12px;border-left:3px solid #22c55e"><div style="font-size:9px;font-weight:700;color:#166534;margin-bottom:4px;text-transform:uppercase">📝 Last Assessment (${lastEv.date})</div><div style="font-size:12px;color:#166534;font-weight:500">${esc(lastEv.assessment)}</div></div>`:''}
+        ${lastEv?.notes?`<div style="margin-top:8px;padding:11px 14px;background:#eff6ff;border-radius:12px;border-left:3px solid #3b82f6"><div style="font-size:9px;font-weight:700;color:#1d4ed8;margin-bottom:4px;text-transform:uppercase">Notes</div><div style="font-size:12px;color:#1e40af;font-weight:500">${esc(lastEv.notes)}</div></div>`:''}
+      </div>
+      <div class="card"><div class="sec">All Evaluations</div>
+        ${evals.map(ev=>{const f=Object.values(ev.scores||{}).filter(Boolean).length;return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9"><div><div style="font-size:13px;font-weight:700;color:#0f172a">${ev.date}</div><div style="font-size:11px;color:#94a3b8;margin-top:2px;font-weight:500">${sName(ev.evaluatorId)} · ${f} scored${ev.assessment?' · 📝':''}</div></div><button class="bd" style="padding:5px 12px;font-size:10px" onclick="deleteEval(${p.id},'${ev.id}')">Delete</button></div>`;}).join('')}
+      </div>`
+    }
+  </div>`;
+}
+
+function renderIDT(){
+  const tuePts=sortedActive().filter(p=>!isDimmed(p)&&p.idtDate&&idtDay(p.idtDate)==='Tue');
+  const thuPts=sortedActive().filter(p=>!isDimmed(p)&&p.idtDate&&idtDay(p.idtDate)==='Thu');
+  if(idtQ){
+    const r=idtQ==='__open__'?patients.find(p=>String(p.id)===String(selIdtId)):patients.find(p=>dn(p).toLowerCase().includes(idtQ.toLowerCase())||p.initials.toLowerCase().includes(idtQ.toLowerCase())||(p.room||'').includes(idtQ));
+    const isTue=r&&idtDay(r.idtDate)==='Tue';
+    const tc=isTue?'#7c3aed':'#059669',tbg=isTue?'#faf5ff':'#f0fdf4',tbd=isTue?'#e9d5ff':'#a7f3d0';
+    let h=`<div class="wrap">
+      <button class="bg" style="margin-bottom:16px;padding:8px 14px;font-size:11px" onclick="idtQ='';render()">← All IDT Patients</button>`;
+    if(!r)h+=`<div class="card" style="text-align:center;padding:40px;color:#94a3b8"><div style="font-size:32px;margin-bottom:10px">🔍</div><div style="font-weight:600">Patient not found</div></div>`;
+    else{
+      const ev=r.evaluations?.[r.evaluations.length-1],evals=r.evaluations||[];
+      const wa=arrStr(r.walkingAids)||(r.walkingAidsNote||''),ta=arrStr(r.transferAids)||(r.transferAidsNote||'');
+      const no=toArr(r.neededOrthotics),name=dn(r);
+      h+=`<div style="background:linear-gradient(135deg,${tbg},#fff);border:2px solid ${tbd};border-radius:20px;padding:22px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div>
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px">
+              <div style="font-size:30px;font-weight:900;color:#0f172a;letter-spacing:-1px">${esc(name)}</div>
+              ${!isAdmin?revBtn(r):''}
+            </div>
+            <div style="font-size:16px;color:${tc};font-weight:700">Room ${esc(r.room)}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:5px;font-weight:500">${esc(r.mainDiagnosis)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <span class="bdg" style="background:${tbg};color:${tc};border:2px solid ${tbd};font-size:13px;font-weight:700;padding:5px 12px">${isTue?'Tuesday':'Thursday'}</span>
+            ${wa?`<div style="font-size:11px;color:#64748b;margin-top:9px;font-weight:500">🚶 ${esc(wa)}</div>`:''}
+            ${ta?`<div style="font-size:11px;color:#64748b;margin-top:3px;font-weight:500">🔄 ${esc(ta)}</div>`:''}
+            ${no.length?`<div style="font-size:11px;color:#1d4ed8;margin-top:4px;font-weight:600">📋 Need: ${no.join(', ')}</div>`:''}
+          </div>
+        </div>
+        ${r.precautions?`<div style="margin-top:14px;padding:10px 14px;background:#fff1f2;border-radius:11px;border:1.5px solid #fda4af"><span style="color:#be123c;font-weight:700;font-size:13px">⚠️ ${esc(r.precautions)}</span></div>`:''}
+        <div style="margin-top:10px;font-size:10px;color:#94a3b8;font-weight:500">${ev?`Last eval: ${ev.date} · ${sName(ev.evaluatorId)} · ${evals.length} total`:'⚠ No evaluations recorded'}</div>
+      </div>`;
+      if(ev){
+        const assessment=ev.assessment||r.assessment;
+        if(assessment)h+=`<div class="card" style="border-left:3px solid #22c55e;background:#f0fdf4"><div style="font-size:9px;font-weight:700;color:#166534;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px">📝 Assessment</div><div style="font-size:14px;color:#166534;font-weight:500;line-height:1.7">${esc(assessment)}</div></div>`;
+        const script=buildScript(r,ev,evals);
+        if(script&&script.parts.length)h+=renderScriptBox(script);
+        if(evals.length>1)h+=`<div class="card"><div class="sec">Progress (${evals.length} evals)</div>${renderProgressTable(evals)}</div>`;
+        else{
+          GROUPS.forEach(g=>{
+            const scored=EVAL_ITEMS.filter(i=>i.group===g&&ev.scores?.[i.key]);if(!scored.length)return;
+            h+=`<div class="card"><div class="sec" style="color:${GC[g]}">${g}</div><div style="display:flex;flex-wrap:wrap;gap:8px">`;
+            scored.forEach(item=>{
+              const s=ev.scores[item.key],m=GG_META[s]||{};const gl=GG_SCORES.find(x=>x.code===s);
+              h+=`<div style="flex:1 1 105px;background:${m.bg||'#f8fafc'};border:2px solid ${m.bd||'#e2e8f0'};border-radius:13px;padding:13px 15px">
+                <div style="font-size:10px;color:#94a3b8;margin-bottom:5px;font-weight:500">${item.label}</div>
+                <div style="display:flex;align-items:baseline;gap:7px">
+                  <div style="font-size:26px;font-weight:900;color:${m.tx||'#0f172a'};line-height:1">${s}</div>
+                  <div style="font-size:11px;font-weight:700;color:${m.tx||'#94a3b8'};opacity:0.9">${gl?.short||''}</div>
+                </div>
+              </div>`;
+            });
+            h+=`</div></div>`;
+          });
+        }
+        if(ev.notes)h+=`<div class="card" style="border-left:3px solid #3b82f6;background:#eff6ff"><div style="font-size:9px;font-weight:700;color:#1d4ed8;margin-bottom:5px;text-transform:uppercase">Notes</div><div style="font-size:13px;color:#1e40af;font-weight:500">${esc(ev.notes)}</div></div>`;
+      }
+    }
+    return h+'</div>';
+  }
+  // Main IDT list view
+  const showPts=idtTab==='tue'?tuePts:thuPts,isTue=idtTab==='tue';
+  const tc=isTue?'#7c3aed':'#059669',tbg=isTue?'#faf5ff':'#f0fdf4',tbd=isTue?'#e9d5ff':'#a7f3d0';
+  let h=`<div class="wrap">
+    <div style="margin-bottom:18px">
+      <div style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.8px;margin-bottom:3px">IDT Presentation</div>
+      <div style="font-size:12px;color:#94a3b8;font-weight:500">Active patients only</div>
+    </div>
+    <div class="sbox">
+      <span style="color:#cbd5e1;font-size:16px">🔍</span>
+      <input placeholder="Search to open detailed view..." value="${esc(idtQ)}" oninput="idtQ=this.value;render()" style="border:none;background:transparent;padding:0;font-size:13px;flex:1">
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn ${idtTab==='tue'?'active':''}" onclick="idtTab='tue';render()">Tuesday (${tuePts.length})</button>
+      <button class="tab-btn ${idtTab==='thu'?'active':''}" onclick="idtTab='thu';render()">Thursday (${thuPts.length})</button>
+    </div>`;
+  if(!showPts.length){h+=`<div style="text-align:center;padding:56px 20px;color:#94a3b8"><div style="font-size:40px;margin-bottom:12px">📅</div><div style="font-weight:700;font-size:15px">No patients for ${isTue?'Tuesday':'Thursday'}</div></div>`;}
+  else{
+    showPts.forEach(p=>{
+      const ev=p.evaluations?.[p.evaluations.length-1],evals=p.evaluations||[];
+      const script=ev?buildScript(p,ev,evals):null,name=dn(p);
+      let trendStr='';
+      if(evals.length>=2){
+        const keys=['rolling','lyingToSitting','sitToStand','bedToWC','walk50','walk150'];
+        const imp=keys.filter(k=>{const a=ggNum(evals[0].scores?.[k]),b=ggNum(evals[evals.length-1].scores?.[k]);return a&&b&&b>a;}).length;
+        const dec=keys.filter(k=>{const a=ggNum(evals[0].scores?.[k]),b=ggNum(evals[evals.length-1].scores?.[k]);return a&&b&&b<a;}).length;
+        if(imp>dec)trendStr=`<span style="color:#15803d;font-size:11px;font-weight:700;background:#f0fdf4;padding:3px 9px;border-radius:999px;border:1.5px solid #86efac">↑ Improving</span>`;
+        else if(dec>imp)trendStr=`<span style="color:#be123c;font-size:11px;font-weight:700;background:#fff1f2;padding:3px 9px;border-radius:999px;border:1.5px solid #fda4af">↓ Declining</span>`;
+        else trendStr=`<span style="color:#64748b;font-size:11px;font-weight:600">→ Stable</span>`;
+      }
+      h+=`<div class="pc" onclick="selIdtId=${p.id};idtQ='__open__';render()" style="border-color:${tbd}">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="background:${tbg};border:1.5px solid ${tbd};border-radius:13px;padding:8px 12px;min-width:56px;text-align:center;flex-shrink:0">
+            <div style="font-size:8px;color:${tc};font-weight:700;letter-spacing:0.5px;text-transform:uppercase">Room</div>
+            <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2">${esc(p.room)||'—'}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:2px">
+              <div style="font-size:15px;font-weight:700;color:#0f172a">${esc(name)}</div>
+              ${!isAdmin?revBtn(p):''}
+            </div>
+            <div style="font-size:11px;color:#64748b;font-weight:500">${esc(p.mainDiagnosis)||'—'} · ×${evals.length} eval${evals.length!==1?'s':''}</div>
+            ${trendStr?`<div style="margin-top:5px">${trendStr}</div>`:''}
+            ${script&&script.lead?`<div style="margin-top:8px;font-size:12px;color:#475569;font-style:italic;padding:8px 12px;background:#f8fafc;border-radius:9px;font-weight:500;border:1px solid #e2e8f0">"${script.lead}"</div>`:''}
+          </div>
+          <div style="flex-shrink:0">
+            ${ev?`<span class="bdg" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac">×${evals.length}</span>`:`<span class="bdg" style="background:#fff1f2;color:#be123c;border:1px solid #fda4af">No eval</span>`}
+          </div>
+        </div>
+        ${p.precautions?`<div style="margin-top:10px;padding:7px 12px;background:#fff1f2;border-radius:8px;border:1px solid #fda4af;font-size:11px;color:#be123c;font-weight:600">⚠️ ${esc(p.precautions)}</div>`:''}
+        <div style="margin-top:9px;font-size:10px;color:${tc};font-weight:600">Tap for full presentation →</div>
+      </div>`;
+    });
+  }
+  return h+'</div>';
+}
+
+function renderSettings(){
+  return`<div class="wrap">
+    <div style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.8px;margin-bottom:18px">Settings</div>
+    <div class="card"><div class="sec">Account</div>
+      <div style="font-size:15px;color:#0f172a;font-weight:700;margin-bottom:3px">${esc(currentUser)}</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;font-weight:500">${isAdmin?'👑 Admin — full names visible permanently':'Standard — names shown as initials'}</div>
+      <button class="bd" style="padding:8px 16px;font-size:11px" onclick="signOut()">Sign Out</button>
+    </div>
+    <div class="card"><div class="sec">Discharge Settings</div>
+      <div class="lbl">Auto-move to Discharged tab after how many days</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <input type="number" min="1" max="14" value="${settings.hideDays||3}" oninput="settings.hideDays=parseInt(this.value)||3;localStorage.setItem('ptc_settings3',JSON.stringify(settings));render()" style="width:80px">
+        <span style="font-size:13px;color:#475569;font-weight:500">days post-discharge</span>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:9px;font-weight:500;line-height:1.5">During this window the card is dimmed but still appears in the Active tab. After N days, it moves to Discharged automatically.</div>
+    </div>
+    <div class="card"><div class="sec">Therapist Directory</div>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+        ${staff.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="bdg" style="background:${s.role==='PT'?'#eff6ff':'#faf5ff'};color:${s.role==='PT'?'#1d4ed8':'#7c3aed'};border:1.5px solid ${s.role==='PT'?'#93c5fd':'#c4b5fd'};font-size:11px">${s.role}</span>
+            <span style="font-weight:700;font-size:14px;color:#0f172a">${esc(s.name)}</span>
+          </div>
+          <button class="bd" style="padding:5px 12px;font-size:11px" onclick="removeStaff('${s.id}')">Remove</button>
+        </div>`).join('')}
+        ${!staff.length?'<div style="text-align:center;color:#94a3b8;padding:18px;font-size:12px;font-weight:500;background:#f8fafc;border-radius:12px;border:1.5px dashed #e2e8f0">No therapists added yet</div>':''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select onchange="nsRole=this.value" style="width:80px;flex-shrink:0">
+          <option value="PT" ${nsRole==='PT'?'selected':''}>PT</option>
+          <option value="PTA" ${nsRole==='PTA'?'selected':''}>PTA</option>
+        </select>
+        <input placeholder="Therapist name" value="${esc(nsName)}" oninput="nsName=this.value" style="flex:1" onkeydown="if(event.key==='Enter')addStaff()">
+        <button class="bp" style="flex-shrink:0;padding:9px 16px;font-size:12px" onclick="addStaff()">+ Add</button>
+      </div>
+    </div>
+    <div class="card"><div class="sec">IDT Schedule Logic</div>
+      <div style="font-size:13px;color:#475569;line-height:2.3;font-weight:500">
+        <div><span style="font-weight:700;color:#0f172a">Sat / Sun / Mon / Tue</span> first eval → <span style="color:#7c3aed;font-weight:700">Tuesday IDT</span></div>
+        <div><span style="font-weight:700;color:#0f172a">Wed / Thu / Fri</span> first eval → <span style="color:#059669;font-weight:700">Thursday IDT</span></div>
+      </div>
+    </div>
+    <div class="card" style="background:#faf5ff;border-color:#e9d5ff">
+      <div style="font-size:12px;color:#4c1d95;font-weight:500;line-height:1.6">
+        🔒 <b>Privacy:</b> Patient names are stored as initials only in the interface. Full names are only visible to admin users (password: <code style="background:#e9d5ff;border-radius:4px;padding:1px 6px">pamocoee_admin</code>).
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── OPEN / COMMIT / DELETE ───────────────────────────────
+function openNew(){formData=ep();selId=null;curView='form';render();}
+function openEdit(id){const p=patients.find(x=>x.id===id);if(!p)return;formData=JSON.parse(JSON.stringify(p));selId=id;curView='form';render();}
+function openDetail(id){const p=patients.find(x=>x.id===id);if(!p)return;curP=JSON.parse(JSON.stringify(p));curView='detail';render();}
+function openDetail2(){if(curP){const fresh=patients.find(x=>x.id===curP.id);if(fresh)curP=JSON.parse(JSON.stringify(fresh));curView='detail';render();}}
+function openEval(id){const p=patients.find(x=>x.id===id);if(!p)return;curP=JSON.parse(JSON.stringify(p));selId=id;evalData=ee();curView='eval';render();}
+
+async function commitPt(){
+  if(!formData.name&&!formData.initials){toast2('Please enter patient name');return;}
+  if(!formData.id)formData.id=Date.now();
+  if(formData.name){formData.initials=toInitials(formData.name);formData._nameEnc=ob(formData.name);}
+  const existing=patients.find(p=>p.id===selId);
+  if(existing){
+    formData.evaluations=existing.evaluations||[];
+    const allDx=new Set(getDxHistory(existing));
+    if(formData.mainDiagnosis)allDx.add(formData.mainDiagnosis.trim());
+    if(formData.subDiagnosis)allDx.add(formData.subDiagnosis.trim());
+    formData.diagnoses=[...allDx].filter(Boolean);
+  }else{
+    formData.evaluations=[];
+    const allDx=new Set();
+    if(formData.mainDiagnosis)allDx.add(formData.mainDiagnosis.trim());
+    if(formData.subDiagnosis)allDx.add(formData.subDiagnosis.trim());
+    formData.diagnoses=[...allDx].filter(Boolean);
+  }
+  const saved=JSON.parse(JSON.stringify(formData));
+  if(selId)patients=patients.map(p=>p.id===selId?saved:p);
+  else patients=[...patients,saved];
+  await syncSave('savePatient',{patient:saved});
+  toast2('Saved ✓');nav('list');
+}
+
+async function delPt(id){
+  if(!confirm('Permanently delete this patient and all records?'))return;
+  patients=patients.filter(p=>p.id!==id);
+  localStorage.setItem('ptc_v12',JSON.stringify(patients));
+  await api('POST',{action:'deletePatient',id});
+  if(curP?.id===id){curP=null;curView='list';}
+  render();toast2('Deleted');
+}
+
+async function deleteEval(pid,evalId){
+  if(!confirm('Delete this evaluation?'))return;
+  patients=patients.map(p=>{if(p.id!==pid)return p;return{...p,evaluations:(p.evaluations||[]).filter(e=>String(e.id)!==String(evalId))};});
+  localStorage.setItem('ptc_v12',JSON.stringify(patients));
+  await api('POST',{action:'deleteEval',id:evalId});
+  const fresh=patients.find(p=>p.id===pid);curP=fresh?JSON.parse(JSON.stringify(fresh)):curP;render();
+}
+
+async function commitEval(){
+  if(!evalData.id)evalData.id=Date.now();
+  evalData.patientId=selId;
+  const saved=JSON.parse(JSON.stringify(evalData));
+  patients=patients.map(p=>{if(p.id!==selId)return p;return{...p,evaluations:[...(p.evaluations||[]),saved]};});
+  await syncSave('saveEval',{eval:saved});
+  const fresh=patients.find(p=>p.id===selId);
+  curP=fresh?JSON.parse(JSON.stringify(fresh)):curP;
+  toast2('Evaluation saved ✓');curView='detail';render();
+}
+
+async function addStaff(){
+  if(!nsName.trim())return;
+  const member={id:Date.now(),name:nsName.trim(),role:nsRole};
+  staff=[...staff,member];
+  localStorage.setItem('ptc_stf12',JSON.stringify(staff));
+  await api('POST',{action:'saveStaff',staff:member});
+  nsName='';render();
+}
+
+async function removeStaff(id){
+  if(!confirm('Remove this therapist?'))return;
+  staff=staff.filter(s=>String(s.id)!==String(id));
+  localStorage.setItem('ptc_stf12',JSON.stringify(staff));
+  await api('POST',{action:'deleteStaff',id});render();
+}
+</script>
+</body>
+</html>
