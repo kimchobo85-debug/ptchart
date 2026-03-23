@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PT Chart</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;min-height:100vh;padding-bottom:80px;color:#0f172a}
@@ -967,6 +968,15 @@ function renderSettings(){
         <div><span style="font-weight:700;color:#0f172a">Wed / Thu / Fri</span> first eval → <span style="color:#059669;font-weight:700">Thursday IDT</span></div>
       </div>
     </div>
+    <div class="card">
+      <div class="sec">📥 Import from Excel</div>
+      <div style="font-size:13px;color:#475569;font-weight:500;margin-bottom:14px;line-height:1.7">Upload your existing IDT Report Form (.xlsx) to automatically import patient data.</div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:10px;background:#f0fdf4;border:2px dashed #86efac;border-radius:12px;padding:20px;cursor:pointer;color:#15803d;font-weight:700;font-size:13px">
+        <span style="font-size:24px">📂</span> Select Excel File (.xlsx)
+        <input type="file" accept=".xlsx" onchange="importExcel(this)" style="display:none">
+      </label>
+      <div id="import-status" style="margin-top:10px;font-size:12px;color:#64748b;font-weight:500"></div>
+    </div>
     <div class="card" style="background:#faf5ff;border-color:#e9d5ff">
       <div style="font-size:12px;color:#4c1d95;font-weight:500;line-height:1.6">
         🔒 <b>Privacy:</b> Patient names are stored as initials only in the interface. Full names are only visible to admin users (password: <code style="background:#e9d5ff;border-radius:4px;padding:1px 6px">pamocoee_admin</code>).
@@ -1050,6 +1060,155 @@ async function removeStaff(id){
   localStorage.setItem('ptc_stf12',JSON.stringify(staff));
   await api('POST',{action:'deleteStaff',id});render();
 }
+// ─── EXCEL IMPORT ─────────────────────────────────────────
+const ROW_KEY_MAP = {
+  17:'rolling', 18:'sitToLying', 19:'lyingToSitting', 20:'sitToStand',
+  21:'bedToWC', 22:'toiletTransfer', 23:'wcToCar', 24:'walk10Even',
+  25:'walk50', 26:'walk150', 27:'walk10Uneven', 28:'step1',
+  29:'step4', 30:'step12', 31:'pickup', 32:'wc50', 33:'wc150'
+};
+const SKIP_SHEETS = new Set(['Main','Sample','Sheet1','DC Past Here']);
+
+function toGG(val){
+  if(val===null||val===undefined||val==='')return null;
+  const v=parseInt(val);
+  if(v>=1&&v<=6)return'0'+v;
+  if(v===7)return'07';if(v===9)return'09';if(v===10)return'10';if(v===88)return'88';
+  return null;
+}
+
+function parseDateFromStr(s){
+  if(!s)return'';
+  const m=String(s).match(/(\d{1,2})\/(\d{1,2})/);
+  if(m)return`2026-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`;
+  return'';
+}
+
+function xlsxDateToStr(val){
+  if(!val)return'';
+  if(typeof val==='number'){
+    // Excel serial date
+    const d=new Date(Math.round((val-25569)*86400*1000));
+    return d.toISOString().slice(0,10);
+  }
+  if(val instanceof Date) return val.toISOString().slice(0,10);
+  return parseDateFromStr(String(val));
+}
+
+async function importExcel(input){
+  const file=input.files[0];if(!file)return;
+  const st=document.getElementById('import-status');
+  st.textContent='⟳ Reading file...';st.style.color='#64748b';
+  const ab=await file.arrayBuffer();
+  const wb=XLSX.read(ab,{type:'array',cellDates:true});
+  const imported=[];
+  const skipSheets=SKIP_SHEETS;
+
+  for(const sheetName of wb.SheetNames){
+    if(skipSheets.has(sheetName))continue;
+    const ws=wb.Sheets[sheetName];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false});
+    if(rows.length<3)continue;
+
+    // Name (row index 2 = Row 3)
+    const nameRaw=rows[2]&&rows[2][0]?String(rows[2][0]).trim():'';
+    if(!nameRaw||nameRaw==='Patient Name 15'||nameRaw==='')continue;
+
+    // Diagnosis (row 1 col 1)
+    const diagRaw=rows[1]&&rows[1][1]?String(rows[1][1]):'';
+    const diag=diagRaw.replace(/Diagnosis\s*:/i,'').trim();
+
+    // PLOF (row 2 col 1)
+    const plofRaw=rows[2]&&rows[2][1]?String(rows[2][1]):'';
+    const plof=plofRaw.replace(/PLOF\s*:/i,'').trim();
+
+    // DME (row 3 col 1)
+    const dmeRaw=rows[3]&&rows[3][1]?String(rows[3][1]):'';
+    const dme=dmeRaw.replace(/DME owned\s*:/i,'').trim();
+
+    // Precautions (row 4 col 1)
+    const otherRaw=rows[4]&&rows[4][1]?String(rows[4][1]):'';
+    const precautions=otherRaw.replace(/Other\s*:/i,'').trim();
+
+    // Dates (row 5 = Row 6)
+    const row6=rows[5]||[];
+    const admitDate=row6[1]?xlsxDateToStr(row6[1]):'';
+    const week1Date=row6[2]?xlsxDateToStr(row6[2]):'';
+    const week2Date=row6[3]?xlsxDateToStr(row6[3]):'';
+    const week2bDate=row6[4]?xlsxDateToStr(row6[4]):'';
+    const week3Date=row6[5]?xlsxDateToStr(row6[5]):'';
+    const dateMap={1:admitDate,2:week1Date,3:week2Date,4:week2bDate,5:week3Date};
+
+    // Scores (rows 16~32 = Row 17~33)
+    const evalsData={};
+    for(const[rowNum,key]of Object.entries(ROW_KEY_MAP)){
+      const r=rows[parseInt(rowNum)-1];
+      if(!r)continue;
+      for(let col=1;col<=5;col++){
+        const gg=toGG(r[col]);
+        if(gg){
+          if(!evalsData[col])evalsData[col]={};
+          evalsData[col][key]=gg;
+        }
+      }
+    }
+
+    const pid=Date.now()+Math.floor(Math.random()*9999);
+    const initials=nameRaw.replace(/,/g,'').split(/\s+/).filter(Boolean).map(w=>w[0].toUpperCase()+'.').join('');
+    const evaluations=Object.keys(evalsData).sort().map((col,i)=>{
+      const evalDate=dateMap[parseInt(col)]||admitDate||'2026-01-01';
+      return{
+        id:pid+parseInt(col),patientId:pid,
+        date:evalDate,evaluatorId:'',
+        scores:evalsData[col],notes:dme,assessment:plof,
+        walkingAids:[],transferAids:[],walkingAidsNote:'',transferAidsNote:''
+      };
+    });
+
+    imported.push({
+      id:pid,name:nameRaw,initials,_nameEnc:ob(nameRaw),
+      room:'',roomHistory:[],
+      diagnoses:diag?[diag]:[],mainDiagnosis:diag,subDiagnosis:'',
+      currentOrthotics:[],neededOrthotics:[],
+      precautions,firstEvalDate:admitDate,evaluatorId:'',
+      dischargeDate:'',dischargeTBD:true,
+      idtDate:admitDate?calcIDT(admitDate):'',idtAuto:true,
+      walkingAids:[],transferAids:[],walkingAidsNote:'',transferAidsNote:'',
+      assessment:plof,admissions:[],evaluations
+    });
+  }
+
+  if(!imported.length){st.textContent='⚠ No patient data found in this file';st.style.color='#be123c';return;}
+
+  // Merge with existing patients (skip duplicates)
+  const existingNames=new Set(patients.map(p=>deob(p._nameEnc||'').toLowerCase()));
+  const newPts=imported.filter(p=>!existingNames.has(p.name.toLowerCase()));
+  const dupCount=imported.length-newPts.length;
+
+  if(!newPts.length){
+    st.textContent=`⚠ All patients already exist (${dupCount} duplicates)`;st.style.color='#b45309';return;
+  }
+
+  if(!confirm(`Import ${newPts.length} patients?${dupCount?` (${dupCount} duplicates skipped)`:''}\n\nPatients:\n`+newPts.slice(0,10).map(p=>p.name).join('\n')+(newPts.length>10?`\n...and ${newPts.length-10} more`:'')))return;
+
+  st.textContent='⟳ Saving...';
+  let saved=0;
+  for(const p of newPts){
+    patients=[...patients,p];
+    const res=await api('POST',{action:'savePatient',patient:p});
+    // Save evaluations too
+    for(const ev of p.evaluations){
+      await api('POST',{action:'saveEval',eval:ev});
+    }
+    saved++;
+    st.textContent=`⟳ Saving... ${saved}/${newPts.length}`;
+  }
+  localStorage.setItem('ptc_v12',JSON.stringify(patients));
+  st.textContent=`✅ ${saved} patients imported!`;st.style.color='#15803d';
+  toast2(`${saved} patients imported ✓`);
+  render();
+}
+
 </script>
 </body>
 </html>
